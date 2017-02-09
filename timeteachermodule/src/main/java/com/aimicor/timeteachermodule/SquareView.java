@@ -15,7 +15,8 @@ public class SquareView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    public void draw(Canvas canvas) {
+        super.draw(canvas);
         draw(canvas, getWidth(), getHeight());
     }
 
