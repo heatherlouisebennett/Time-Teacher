@@ -4,7 +4,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:orientation="vertical"
+        style="@style/clock_orientation"
         tools:context="com.aimicor.timeteacher.MainActivity">
 
     <com.aimicor.timeteachermodule.CircleView

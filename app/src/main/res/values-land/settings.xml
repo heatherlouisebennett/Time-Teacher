@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer name="clock_gravity">16</integer>
+    <style name="clock_orientation">
+        <item name="android:orientation">horizontal</item>
+    </style>
 </resources>
