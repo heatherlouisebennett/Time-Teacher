@@ -4,19 +4,33 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
+        android:weightSum="2"
+        android:baselineAligned="false"
         style="@style/clock_orientation"
         tools:context="com.aimicor.timeteacher.MainActivity">
 
-    <com.aimicor.timeteachermodule.CircleView
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_weight="1"
-            android:layout_gravity="center"
-            android:background="@color/blue"/>
+    <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
 
-    <com.aimicor.timeteachermodule.SquareView
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_weight="1"/>
+        <com.aimicor.timeteachermodule.CircleView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center" />
+
+    </FrameLayout>
+
+    <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+        <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@android:drawable/ic_lock_idle_alarm" />
+
+    </FrameLayout>
 
 </LinearLayout>
