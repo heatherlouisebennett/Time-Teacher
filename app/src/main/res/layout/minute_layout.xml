@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        style="@style/clock_orientation">
+
+    <com.aimicor.timeteachermodule.MinuteView
+            android:id="@+id/minute_view"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"/>
+
+    <com.aimicor.timeteachermodule.SquareView
+            android:id="@+id/minute_view_placeholder"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"/>
+
+</LinearLayout>

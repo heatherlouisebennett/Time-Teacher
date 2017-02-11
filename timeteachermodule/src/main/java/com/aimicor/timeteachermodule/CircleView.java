@@ -11,7 +11,7 @@ import static android.graphics.Paint.Style.STROKE;
 
 public class CircleView extends SquareView {
 
-    private static final float STROKE_WIDTH_FACTOR = 1f;
+    protected static final float STROKE_WIDTH_FACTOR = 1f;
 
     public CircleView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -25,7 +25,7 @@ public class CircleView extends SquareView {
     }
 
     @NonNull
-    private Paint getPaint(float strokeWidth) {
+    protected Paint getPaint(float strokeWidth) {
         Paint paint = new Paint();
         paint.setAntiAlias(true);
         paint.setStyle(STROKE);

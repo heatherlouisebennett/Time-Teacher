@@ -6,8 +6,7 @@
         android:layout_width="match_parent"
         android:weightSum="2"
         android:baselineAligned="false"
-        style="@style/clock_orientation"
-        tools:context="com.aimicor.timeteacher.MainActivity">
+        style="@style/clock_orientation">
 
     <FrameLayout
             android:layout_width="match_parent"
@@ -27,6 +26,7 @@
             android:layout_weight="1">
 
         <ImageView
+                android:id="@+id/minute_view_placeholder_img"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@android:drawable/ic_lock_idle_alarm" />
