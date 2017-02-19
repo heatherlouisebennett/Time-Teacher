@@ -23,7 +23,7 @@ public class MinuteViewVerticalMoverImplTest {
     private View mockMinuteView;
 
     private static final float openPosition = 100;
-    private float mFullAnimationDuration;
+    private static final float mFullAnimationDuration = 250f;
 
     @Before
     public void setup() {

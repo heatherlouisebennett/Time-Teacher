@@ -25,6 +25,9 @@ class MinuteViewVerticalMoverImpl implements View.OnTouchListener {
                 break;
             case MotionEvent.ACTION_MOVE:
                 mMinuteView.setY(min(max(mMinuteView.getY() + event.getY() - mTouchDownPosition, 0), mOpenPosition));
+                break;
+            case MotionEvent.ACTION_UP:
+                mMinuteView.startAnimation(new MoveAnimation(0, 0, 0, -30f));
         }
         return false;
     }
