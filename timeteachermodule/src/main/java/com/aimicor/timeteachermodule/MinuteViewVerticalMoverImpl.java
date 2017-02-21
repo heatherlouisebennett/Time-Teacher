@@ -1,6 +1,5 @@
 package com.aimicor.timeteachermodule;
 
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
@@ -16,7 +15,7 @@ public class MinuteViewVerticalMoverImpl implements View.OnTouchListener, Animat
     private final TranslateAnimationFactory mAnimationFactory;
     private float mTouchDownPosition;
 
-    private static final float ANIMATION_DURATION = 1000;
+    static final float ANIMATION_DURATION = 1000;
 
     public MinuteViewVerticalMoverImpl(View minuteView, float openPosition) {
         this(minuteView, openPosition, new TranslateAnimationFactory());
@@ -56,7 +55,6 @@ public class MinuteViewVerticalMoverImpl implements View.OnTouchListener, Animat
 
     @Override
     public void onAnimationEnd(Animation animation) {
-        Log.i("mydebug", "onAnimationEnd");
         if (mMinuteView.getY() < mOpenPosition / 2) {
             mMinuteView.setY(0);
         } else {

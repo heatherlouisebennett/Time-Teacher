@@ -26,7 +26,7 @@ public class MinuteViewVerticalMoverImplTest {
     private TranslateAnimationFactory mockAnimationFactory;
 
     private static final float openPosition = 100;
-    private static final float mFullAnimationDuration = 250f;
+    private static final float mFullAnimationDuration = MinuteViewVerticalMoverImpl.ANIMATION_DURATION;
 
     @Before
     public void setup() {
