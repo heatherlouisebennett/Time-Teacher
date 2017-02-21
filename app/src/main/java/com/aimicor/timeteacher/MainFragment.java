@@ -1,5 +1,7 @@
 package com.aimicor.timeteacher;
 
+import com.aimicor.timeteachermodule.MinuteViewVerticalMoverImpl;
+
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -36,7 +38,7 @@ public class MainFragment extends Fragment implements View.OnClickListener, Anim
         mMinuteView = mRoot.findViewById(R.id.minute_view);
         mMinuteViewPlaceHolderImg = mRoot.findViewById(R.id.minute_view_placeholder_img);
 //        mMinuteView.setOnClickListener(this);
-        mMinuteView.setOnTouchListener(this);
+//        mMinuteView.setOnTouchListener(this);
         mRoot.getViewTreeObserver().addOnGlobalLayoutListener(this);
         return mRoot;
     }
@@ -44,6 +46,7 @@ public class MainFragment extends Fragment implements View.OnClickListener, Anim
     @Override
     public void onGlobalLayout() {
         mMinuteViewOpenPosition = mMinuteView.getRootView().findViewById(R.id.minute_view_placeholder).getY();
+        mMinuteView.setOnTouchListener(new MinuteViewVerticalMoverImpl(mMinuteView, mMinuteViewOpenPosition));
         mRoot.getViewTreeObserver().removeOnGlobalLayoutListener(this);
     }
 

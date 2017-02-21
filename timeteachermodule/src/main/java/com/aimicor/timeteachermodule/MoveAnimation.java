@@ -17,19 +17,19 @@ class MoveAnimation extends TranslateAnimation {
         mToYDelta = toYDelta;
     }
 
-    public float getFromXDelta() {
+    float getFromXDelta() {
         return mFromXDelta;
     }
 
-    public float getToXDelta() {
+    float getToXDelta() {
         return mToXDelta;
     }
 
-    public float getFromYDelta() {
+    float getFromYDelta() {
         return mFromYDelta;
     }
 
-    public float getToYDelta(){
+    float getToYDelta(){
         return mToYDelta;
     }
 }
