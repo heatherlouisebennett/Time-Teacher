@@ -38,15 +38,16 @@ public class MainFragment extends Fragment implements View.OnClickListener, Anim
         mMinuteView = mRoot.findViewById(R.id.minute_view);
         mMinuteViewPlaceHolderImg = mRoot.findViewById(R.id.minute_view_placeholder_img);
 //        mMinuteView.setOnClickListener(this);
-        mMinuteView.setOnTouchListener(this);
         mRoot.getViewTreeObserver().addOnGlobalLayoutListener(this);
+        mRoot.setScaleX(1f);
         return mRoot;
     }
 
     @Override
     public void onGlobalLayout() {
         mMinuteViewOpenPosition = mMinuteView.getRootView().findViewById(R.id.minute_view_placeholder).getY();
-//        mMinuteView.setOnTouchListener(new MinuteViewVerticalMoverImpl(mMinuteView, mMinuteViewOpenPosition));
+//        mMinuteView.setOnTouchListener(new ViewVerticalMover(mMinuteView, mMinuteViewOpenPosition));
+        mMinuteView.setOnTouchListener(this);
         mRoot.getViewTreeObserver().removeOnGlobalLayoutListener(this);
     }
 
@@ -59,6 +60,7 @@ public class MainFragment extends Fragment implements View.OnClickListener, Anim
     private boolean legacyOnTouch(MotionEvent event) {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
+                Log.w("mydebug", "ACTION_DOWN event finger=" + event.getActionIndex() + "," + event.getPointerId(event.getActionIndex()) + " Active finger=" + event.findPointerIndex(mActivePointerId) + "," + mActivePointerId);
                 final int pointerIndex = event.getActionIndex();
                 mLastTouchY = event.getY(pointerIndex);
                 mActivePointerId = event.getPointerId(pointerIndex);
@@ -68,6 +70,7 @@ public class MainFragment extends Fragment implements View.OnClickListener, Anim
                 mMinuteView.setY(mMinuteView.getY() + event.getY(event.findPointerIndex(mActivePointerId)) - mLastTouchY);
                 break;
             case MotionEvent.ACTION_POINTER_UP:
+                Log.w("mydebug", "ACTION_POINTER_UP event finger=" + event.getActionIndex() + "," + event.getPointerId(event.getActionIndex()) + " Active finger=" + event.findPointerIndex(mActivePointerId) + "," + mActivePointerId);
                 int pointerIndex = event.getActionIndex();
                 if (event.getPointerId(pointerIndex) == mActivePointerId) {
                     // This was our active pointer going up. Choose a new
@@ -77,34 +80,48 @@ public class MainFragment extends Fragment implements View.OnClickListener, Anim
                     mActivePointerId = event.getPointerId(pointerIndex);
                     break;
                 }
+
+
+
+
             case MotionEvent.ACTION_UP:
-                TranslateAnimation animation = getTranslateAnimation2();
-                animation.setDuration(100);
-                animation.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                    }
+                if(event.getPointerId(event.getActionIndex()) == mActivePointerId) {
+                    Log.i("mydebug", "ACTION_UP event finger=" + event.getActionIndex() + "," + event.getPointerId(event.getActionIndex()) + " Active finger=" + event.findPointerIndex(mActivePointerId) + "," + mActivePointerId);
+                    TranslateAnimation animation = getTranslateAnimation2();
+                    animation.setDuration(100);
+                    animation.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+                        }
 
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        new Handler().post(new Runnable() {
-                            @Override
-                            public void run() {
-                                if(mMinuteView.getY() < mMinuteViewOpenPosition / 2){
-                                    mMinuteView.setY(0);
-                                } else {
-                                    mMinuteView.setY(mMinuteViewOpenPosition);
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            Runnable myRunnableNamed = new MyRunnable();
+                            Runnable myRunnableAnon = new Runnable() {
+                                @Override
+                                public void run() {
+
                                 }
-                             }
-                        });
-                    }
+                            };
+                            new Handler().post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (mMinuteView.getY() < mMinuteViewOpenPosition / 2) {
+                                        mMinuteView.setY(0);
+                                    } else {
+                                        mMinuteView.setY(mMinuteViewOpenPosition);
+                                    }
+                                }
+                            });
+                        }
 
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
 
-                    }
-                });
-                mMinuteView.startAnimation(animation);
+                        }
+                    });
+                    mMinuteView.startAnimation(animation);
+                }
         }
         return true;
     }
@@ -186,5 +203,13 @@ public class MainFragment extends Fragment implements View.OnClickListener, Anim
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
         Log.i("mydebug", "onFling " + velocityX + ", " + velocityY);
         return false;
+    }
+
+    private class MyRunnable implements Runnable {
+
+        @Override
+        public void run() {
+
+        }
     }
 }
