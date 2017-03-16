@@ -19,8 +19,8 @@ public class ViewVerticalMover implements View.OnTouchListener, Animation.Animat
 
     private final View mMoveableView;
     private final float mOpenPosition;
-    private final TranslateAnimationFactory mAnimationFactory;
     private final Handler mHandler;
+    private final PositionHandler mPositionHandler;
     private float mTouchDownPosition;
     private int mActivePointerId;
 
@@ -31,7 +31,7 @@ public class ViewVerticalMover implements View.OnTouchListener, Animation.Animat
     ViewVerticalMover(View moveableView, float openPosition, TranslateAnimationFactory animationFactory, Handler handler) {
         mMoveableView = moveableView;
         mOpenPosition = openPosition;
-        mAnimationFactory = animationFactory;
+        mPositionHandler = new VerticalPositionHandler(animationFactory);
         mHandler = handler;
     }
 
@@ -60,10 +60,10 @@ public class ViewVerticalMover implements View.OnTouchListener, Animation.Animat
 
     @Override
     public void run() {
-        if (mMoveableView.getY() < mOpenPosition / 2) {
-            mMoveableView.setY(0);
+        if (mPositionHandler.getPos(mMoveableView) < mOpenPosition / 2) {
+            mPositionHandler.setPos(mMoveableView, 0);
         } else {
-            mMoveableView.setY(mOpenPosition);
+            mPositionHandler.setPos(mMoveableView, mOpenPosition);
         }
     }
 
@@ -78,34 +78,36 @@ public class ViewVerticalMover implements View.OnTouchListener, Animation.Animat
     }
 
     private void actionUp(MotionEvent event) {
-        if(event.getPointerId(event.getActionIndex()) == mActivePointerId) {
+        if (event.getPointerId(event.getActionIndex()) == mActivePointerId) {
             actionUp();
         }
     }
 
     private void actionUp() {
-        float viewPosition = mMoveableView.getY();
-        TranslateAnimation animation = mAnimationFactory.createWithDeltas(0, 0, 0, getToYDelta(viewPosition));
+        float viewPosition = mPositionHandler.getPos(mMoveableView);
+        TranslateAnimation animation = mPositionHandler.getAnimation(getToYDelta(viewPosition));
         animation.setDuration(getDurationMillis(viewPosition));
         animation.setAnimationListener(this);
         mMoveableView.startAnimation(animation);
     }
 
     private void actionPointerUp(MotionEvent event, int pointerIndex) {
-        if (event.getPointerId(pointerIndex) ==mActivePointerId) {
+        if (event.getPointerId(pointerIndex) == mActivePointerId) {
             setReferencePoint(event, pointerIndex == 0 ? 1 : 0);
         }
     }
 
     private void setReferencePoint(MotionEvent event, int pointerIndex) {
-        mTouchDownPosition = event.getY(pointerIndex);
+        mTouchDownPosition = mPositionHandler.getPos(event, pointerIndex);
         mActivePointerId = event.getPointerId(pointerIndex);
     }
 
+
+
     private void actionMove(MotionEvent event) {
-        float activePointerPosition = event.getY(event.findPointerIndex(mActivePointerId));
-        float newPosition = mMoveableView.getY() + activePointerPosition - mTouchDownPosition;
-        mMoveableView.setY(min(max(newPosition, 0), mOpenPosition));
+        float activePointerPosition = mPositionHandler.getPos(event, event.findPointerIndex(mActivePointerId));
+        float newPosition = mPositionHandler.getPos(mMoveableView) + activePointerPosition - mTouchDownPosition;
+        mPositionHandler.setPos(mMoveableView, min(max(newPosition, 0), mOpenPosition));
     }
 
     private void actionDown(MotionEvent event) {
