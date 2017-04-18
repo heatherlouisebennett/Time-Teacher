@@ -13,26 +13,30 @@ import static android.view.MotionEvent.ACTION_UP;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-public class ViewVerticalMover implements View.OnTouchListener, Animation.AnimationListener, Runnable {
+public class ViewMover implements View.OnTouchListener, Animation.AnimationListener, Runnable {
 
     static final float ANIMATION_DURATION = 250;
 
-    private final View mMoveableView;
-    private final float mOpenPosition;
+    private View mMoveableView;
+    private float mOpenPosition;
     private final Handler mHandler;
     private final PositionHandler mPositionHandler;
     private float mTouchDownPosition;
     private int mActivePointerId;
 
-    public ViewVerticalMover(View moveableView, float openPosition) {
-        this(moveableView, openPosition, new TranslateAnimationFactory(), new Handler());
+    public ViewMover() {
+        this(new TranslateAnimationFactory(), new Handler());
     }
 
-    ViewVerticalMover(View moveableView, float openPosition, TranslateAnimationFactory animationFactory, Handler handler) {
-        mMoveableView = moveableView;
-        mOpenPosition = openPosition;
+    ViewMover(TranslateAnimationFactory animationFactory, Handler handler) {
         mPositionHandler = new VerticalPositionHandler(animationFactory);
         mHandler = handler;
+    }
+
+    public void onGlobalLayout(View moveableView, View endPointView) {
+        mMoveableView = moveableView;
+        mOpenPosition = endPointView.getY();
+
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.aimicor.timeteacher;
 
+import com.aimicor.timeteachermodule.ViewMover;
+
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
@@ -45,9 +47,12 @@ public class MainFragment extends Fragment implements View.OnClickListener, Anim
 
     @Override
     public void onGlobalLayout() {
+        Log.i("mydebug", "orientation=" + mMinuteView.getContext().getResources().getConfiguration().orientation);
         mMinuteViewOpenPosition = mMinuteView.getRootView().findViewById(R.id.minute_view_placeholder).getY();
-//        mMinuteView.setOnTouchListener(new ViewVerticalMover(mMinuteView, mMinuteViewOpenPosition));
-        mMinuteView.setOnTouchListener(this);
+        ViewMover onTouchListener = new ViewMover();
+        onTouchListener.onGlobalLayout(mMinuteView, mMinuteView.getRootView().findViewById(R.id.minute_view_placeholder));
+        mMinuteView.setOnTouchListener(onTouchListener);
+//        mMinuteView.setOnTouchListener(this);
         mRoot.getViewTreeObserver().removeOnGlobalLayoutListener(this);
     }
 
