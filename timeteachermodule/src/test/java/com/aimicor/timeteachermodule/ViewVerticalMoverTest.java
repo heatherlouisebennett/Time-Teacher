@@ -7,7 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.TranslateAnimation;
@@ -44,8 +43,6 @@ public class ViewVerticalMoverTest {
     private static final float openPosition = 100;
     private static final float mFullAnimationDuration = ViewMover.ANIMATION_DURATION;
 
-    private PositionMocker mPositionMocker;
-
     @Before
     public void setup() {
         initMocks(this);
@@ -56,11 +53,12 @@ public class ViewVerticalMoverTest {
 
     @Test
     public void on_touch_returns_true() {
-        assertThat(subject.onTouch(mockMoveableView, motionEvent(ACTION_DOWN, 30f, 0, 0))).isTrue();
-        assertThat(subject.onTouch(mockMoveableView, motionEvent(ACTION_MOVE, 30f, 0, 0))).isTrue();
+        PositionMocker positionMocker = new VerticalPositionMocker();
+        assertThat(subject.onTouch(mockMoveableView, positionMocker.motionEvent(ACTION_DOWN, 30f, 0, 0))).isTrue();
+        assertThat(subject.onTouch(mockMoveableView, positionMocker.motionEvent(ACTION_MOVE, 30f, 0, 0))).isTrue();
 
         when(mockAnimationFactory.createWithDeltas(eq(0f), eq(0f), eq(0f), anyFloat())).thenReturn(mock(TranslateAnimation.class));
-        assertThat(subject.onTouch(mockMoveableView, motionEvent(ACTION_UP, 30f, 0, 0))).isTrue();
+        assertThat(subject.onTouch(mockMoveableView, positionMocker.motionEvent(ACTION_UP, 30f, 0, 0))).isTrue();
     }
 
     @Test
@@ -103,22 +101,39 @@ public class ViewVerticalMoverTest {
         finalPositionTest(60f, openPosition, new VerticalPositionMocker());
     }
 
+    @Test
+    public void remaining_second_finger_becomes_new_point_of_reference_moving_down() {
+        PositionMocker positionMocker = new VerticalPositionMocker();
+        newReferenceTest(10f, 20f, 40f, 0, 20f, positionMocker);
+        newReferenceTest(15f, 30f, 45f, 0, 15f, positionMocker);
+        newReferenceTest(20f, 10f, 50f, 0, 40f, positionMocker);
+        newReferenceTest(20f, 60f, 90f, 80f, openPosition, positionMocker);
+    }
+
     @Test // TODO split between moving up and moving down, set initial position
-    public void remaining_second_finger_becomes_new_point_of_reference() {
-        mPositionMocker = new VerticalPositionMocker();
-        newReferenceTest(10f, 20f, 40f, 20f);
-        newReferenceTest(15f, 30f, 45f, 15f);
-        newReferenceTest(20f, 10f, 50f, 40f);
-        newReferenceTest(5f, 95f, 50f, 0f);
+    public void remaining_second_finger_becomes_new_point_of_reference_moving_up() {
+        PositionMocker positionMocker = new VerticalPositionMocker();
+        newReferenceTest(50f, 75f, 55f, openPosition, 80f, positionMocker);
+        newReferenceTest(5f, 95f, 50f, 0, 0f, positionMocker);
     }
 
     @Test
-    public void remaining_first_finger_not_affected_by_second_finger() {
-        when(mockAnimationFactory.createWithDeltas(anyFloat(), anyFloat(), anyFloat(), anyFloat())).thenReturn(mock(TranslateAnimation.class));
-        subject.onTouch(mockMoveableView, motionEvent(ACTION_DOWN, 10f, 0, 0));
-        subject.onTouch(mockMoveableView, motionEvent(ACTION_UP, 70f, 1, 1));
-
+    public void remaining_first_finger_not_affected_by_second_finger_in_vertical() {
+        remaining_first_finger_not_affected_by_second_finger(new VerticalPositionMocker());
         verify(mockMoveableView, never()).setY(anyFloat());
+    }
+
+    @Test
+    public void remaining_first_finger_not_affected_by_second_finger_in_horizontal() {
+        remaining_first_finger_not_affected_by_second_finger(new HorizontalPositionMocker());
+        verify(mockMoveableView, never()).setX(anyFloat());
+    }
+
+    private void remaining_first_finger_not_affected_by_second_finger(PositionMocker positionMocker) {
+        when(mockAnimationFactory.createWithDeltas(anyFloat(), anyFloat(), anyFloat(), anyFloat())).thenReturn(mock(TranslateAnimation.class));
+        subject.onTouch(mockMoveableView, positionMocker.motionEvent(ACTION_DOWN, 10f, 0, 0));
+        subject.onTouch(mockMoveableView, positionMocker.motionEvent(ACTION_UP, 70f, 1, 1));
+
         verify(mockMoveableView, never()).startAnimation(any(TranslateAnimation.class));
     }
 
@@ -139,7 +154,7 @@ public class ViewVerticalMoverTest {
         positionMocker.mockAnimationFactory(expectedAnimationChange, animation);
         positionMocker.mockPos(actionUpPos);
 
-        subject.onTouch(mockMoveableView, motionEvent(ACTION_UP, actionUpPos, 0, 0));
+        subject.onTouch(mockMoveableView, positionMocker.motionEvent(ACTION_UP, actionUpPos, 0, 0));
 
         verify(mockMoveableView).startAnimation(animation);
         verify(animation).setDuration((long) expectedAnimationDuration);
@@ -150,42 +165,48 @@ public class ViewVerticalMoverTest {
     private void moveTest(float initialpos, float actionDownPos, float movePos, float finalPos, PositionMocker positionMocker) {
         positionMocker.mockPos(initialpos);
 
-        subject.onTouch(mockMoveableView, motionEvent(ACTION_DOWN, actionDownPos, 0, 0));
-        subject.onTouch(mockMoveableView, motionEvent(ACTION_MOVE, movePos, 0, 0));
+        subject.onTouch(mockMoveableView, positionMocker.motionEvent(ACTION_DOWN, actionDownPos, 0, 0));
+        subject.onTouch(mockMoveableView, positionMocker.motionEvent(ACTION_MOVE, movePos, 0, 0));
 
         positionMocker.verifyPos(finalPos);
     }
 
-    private void newReferenceTest(float firstfingerposition, float secondfingerposition, float moveposition, float finalposition) {
-        MotionEvent actionPointerUp = motionEvent(ACTION_POINTER_UP, firstfingerposition, 0, 0);
-        when(actionPointerUp.getY(1)).thenReturn(secondfingerposition);
+    private void newReferenceTest(float firstfingerposition, float secondfingerposition,
+                                  float fingermoveposition, float initialposition, float finalposition, PositionMocker positionMocker) {
+        positionMocker.mockPos(initialposition);
+        MotionEvent actionPointerUp = positionMocker.motionEvent(ACTION_POINTER_UP, firstfingerposition, 0, 0);
+        positionMocker.mockEventPos(actionPointerUp, secondfingerposition, 1);
         when(actionPointerUp.getPointerId(1)).thenReturn(1);
 
-        subject.onTouch(mockMoveableView, motionEvent(ACTION_DOWN, firstfingerposition, 0, 0));
+        subject.onTouch(mockMoveableView, positionMocker.motionEvent(ACTION_DOWN, firstfingerposition, 0, 0));
         subject.onTouch(mockMoveableView, actionPointerUp);
-        subject.onTouch(mockMoveableView, motionEvent(ACTION_MOVE, moveposition, 0, 1));
+        subject.onTouch(mockMoveableView, positionMocker.motionEvent(ACTION_MOVE, fingermoveposition, 0, 1));
 
-        mPositionMocker.verifyPos(finalposition);
+        positionMocker.verifyPos(finalposition);
     }
 
-    @NonNull
-    private MotionEvent motionEvent(int action, float value, int pointerIndex, int pointerId) {
-        MotionEvent event = mock(MotionEvent.class);
-        when(event.getActionIndex()).thenReturn(pointerIndex);
-        when(event.getPointerId(pointerIndex)).thenReturn(pointerId);
-        when(event.findPointerIndex(pointerId)).thenReturn(pointerIndex);
-        when(event.getActionMasked()).thenReturn(action);
-        when(event.getY(pointerIndex)).thenReturn(value);
-        return event;
+    private abstract class PositionMocker {
+
+        MotionEvent motionEvent(int action, float value, int pointerIndex, int pointerId) {
+            MotionEvent event = mock(MotionEvent.class);
+            when(event.getActionIndex()).thenReturn(pointerIndex);
+            when(event.getPointerId(pointerIndex)).thenReturn(pointerId);
+            when(event.findPointerIndex(pointerId)).thenReturn(pointerIndex);
+            when(event.getActionMasked()).thenReturn(action);
+            mockEventPos(event, value, pointerIndex);
+            return event;
+        }
+
+        abstract void verifyPos(float finalViewPos);
+
+        abstract void mockPos(float initialViewPos);
+
+        abstract void mockAnimationFactory(float expectedAnimationChange, TranslateAnimation animation);
+
+        abstract void mockEventPos(MotionEvent event, float value, int pointerIndex);
     }
 
-    private interface PositionMocker {
-        void verifyPos(float finalViewPos);
-        void mockPos(float initialViewPos);
-        void mockAnimationFactory(float expectedAnimationChange, TranslateAnimation animation);
-    }
-
-    private class VerticalPositionMocker implements PositionMocker{
+    private class VerticalPositionMocker extends PositionMocker {
 
         public void verifyPos(float finalViewPos) {
             verify(mockMoveableView).setY(finalViewPos);
@@ -198,9 +219,14 @@ public class ViewVerticalMoverTest {
         public void mockAnimationFactory(float expectedAnimationChange, TranslateAnimation animation) {
             when(mockAnimationFactory.createWithDeltas(0f, 0f, 0f, expectedAnimationChange)).thenReturn(animation);
         }
+
+        @Override
+        void mockEventPos(MotionEvent event, float value, int pointerIndex) {
+            when(event.getY(pointerIndex)).thenReturn(value);
+        }
     }
 
-    private class HorizontalPositionMocker implements PositionMocker{
+    private class HorizontalPositionMocker extends PositionMocker {
 
         public void verifyPos(float finalViewPos) {
             verify(mockMoveableView).setX(finalViewPos);
@@ -212,6 +238,11 @@ public class ViewVerticalMoverTest {
 
         public void mockAnimationFactory(float expectedAnimationChange, TranslateAnimation animation) {
             when(mockAnimationFactory.createWithDeltas(0f, 0f, expectedAnimationChange, 0f)).thenReturn(animation);
+        }
+
+        @Override
+        void mockEventPos(MotionEvent event, float value, int pointerIndex) {
+            when(event.getX(pointerIndex)).thenReturn(value);
         }
     }
 }
